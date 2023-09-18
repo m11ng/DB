@@ -157,65 +157,55 @@ order by 2 -- e.id -- 정렬
 
 
 -- 19. 직원 중에 '김정미'와 같은 직책(title)을 가지는 사원의 이름과 직책, 급여, 부서번호를 나타내시오(self join을 사용할 것)
---                                    과장
--- self join : 동일 테이블 사이의 조인
 select * from s_emp;
-order by dept_id;
-
-select title from s_emp
-where name = '김정미'
-;
-
-select title, name from s_emp where name = '김정미';
-
-select * from s_emp j, s_emp n where j.id = n.id where title = (select title from s_emp where name = '김정미');
-
-select * from s_emp;
-select n.title, n.salary, n.dept_id, n.name from s_emp j, s_emp n
+select * from s_emp where name = '김정미';
+select dept_id from s_emp where name = '김정미';
+--1
+select n.title, n.salary, n.dept_id, n.name 
+from s_emp j, s_emp n
 where j.id = n.id and n.title = (select title from s_emp
 where name = '김정미');
-
-select n.title, n.salary, n.dept_id, n.name from s_emp j, s_emp n
-where n.title = j.title
+--2
+select n.title, n.salary, n.dept_id, n.name 
+from s_emp j, s_emp n
+where n.id = j.id -- 셀프조인에 조건을 주지 않으면 구구단 일어남
+and n.title = (select title from s_emp where name = '김정미')
+and j.name not like '김정미%'
 ;
 
-
--- 구구단으로 돌아간 걸 한번 걸러주는 거. 박구곤 - 박구곤 만 빼고 다 지워
-j.name='김정미' 
-and j.title = n.title 
-and j.salary = n.salary 
-and j.dept_id = n.dept_id 
-and n.name not like '김정미'-- 같은 직책을 가지는
--- 사원의 이름과 직책, 급여, 부서번호를 나타내시오
-;
-
-select e.title, e.name, e.salary, e.dept_id from s_emp e, s_emp n
-where e.title = n.title
-group by title
-having title = '과장'
-;
-
-select w.id 사번, w.name 사원명,
-       m.id 부서장사번, m.name 부서장명
-from s_emp w, s_emp m
-where w.manager_id=m.id
-;
 
 -- 20. 가장 적은 평균급여를 받는 직책에 대해 그 직책과 평균급여를 나타내시오
 --          min(salary)        title                   a  avg(salary)
 select * from s_emp;
--- 그룹별 평균 급여 부터 구하기
 
-select title, avg(salary) from s_emp3
+-- 평균급여
+select title, avg(salary) from s_emp
 group by title
-order by avg(salary)
 ;
-select title, min(salary) from s_emp
+-- 적은 평균급여
+select title, min(avg(salary)) from s_emp
 group by title
-order by min(salary)
+
+;
+
+select title, avg(salary) from s_emp
+group by title
+having avg(salary) = 
+    (select min(avg(salary)) from s_emp
+group by title)
+;
+
+--  부서별 평균 급여를 내고, 
+select name, dept_id, salary
+from s_emp
+where(salary, dept_id) in 
+    (select min(salary), dept_id from s_emp
+    group by dept_id)
 ;
 
 
+select min(salary), dept_id from s_emp
+    group by dept_id;
 
 
 
@@ -230,9 +220,6 @@ order by min(salary)
 -- 24. 본인이 다른 사람의 관리자(manager_id) 로 되어있는 직원의 사번, 이름, 직책, 부서번호를 나타내시오(exist 사용할 것)
 
 -- 25. 직원(s_emp) 테이블에서 이름을 사전순으로 정렬하여 5개의 데이터만 나타내시오.
-
-
-
 
 
 
